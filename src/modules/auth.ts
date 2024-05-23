@@ -3,23 +3,27 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
 type UserType = {
-  user: {
-    id: number;
-    username: string;
-  };
+  id: number;
+  username: string;
 };
 
-export const createJWT = (user: any) => {
+declare global {
+  namespace Express {
+    interface Request {
+      user?: UserType;
+    }
+  }
+}
+
+export const createJWT = (user: UserType): string => {
   const token = jwt.sign(
     { id: user.id, username: user.username },
     process.env.JWT_SECRET || ""
   );
-  console.log("hello");
-  console.log(" token ", token);
   return token;
 };
 
-export const protect = (req: any, res: any, next: any) => {
+export const protect = (req: Request, res: Response, next: NextFunction) => {
   const bearer = req.headers.authorization;
 
   if (!bearer) {
@@ -28,7 +32,7 @@ export const protect = (req: any, res: any, next: any) => {
     return;
   }
 
-  const [, token] = bearer.split(" ");
+  const [, token] = (bearer as string).split(" ");
 
   if (!token) {
     res.status(401);
@@ -37,12 +41,11 @@ export const protect = (req: any, res: any, next: any) => {
   }
 
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET || "");
+    const user = jwt.verify(token, process.env.JWT_SECRET || "") as UserType;
     req.user = user;
     next();
     return;
   } catch (e) {
-    console.error(e);
     res.status(401);
     res.json({ message: "Not authorized" });
     return;
