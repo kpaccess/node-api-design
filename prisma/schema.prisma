@@ -19,9 +19,9 @@ model User {
   username  String   @unique
   password  String
 
-  Product Product[]
-  Post    Post[]
-  Update  Update[]
+  products Product[]
+  Post     Post[]
+  update   Update[]
 }
 
 model Product {
@@ -32,6 +32,8 @@ model Product {
   belongsTo   User     @relation(fields: [belongsToId], references: [id])
   belongsToId String
   updates     Update[]
+
+  // @@unique([id, belongsToId])
 }
 
 model Post {
@@ -48,9 +50,8 @@ model Post {
 
 enum UPDATE_STATUS {
   IN_PROGRESS
-  LIVE
+  SHIPPED
   DEPRECATED
-  ARCHIVED
 }
 
 model Update {
