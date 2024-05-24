@@ -1,10 +1,15 @@
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 import { Request, Response, NextFunction } from "express";
+import { UserType } from "../../types";
 
-type UserType = {
-  id: number;
-  username: string;
+export const comparePasswords = (password: string | "", hash: string | "") => {
+  return bcrypt.compare(password, hash);
+};
+
+export const hashPassword = (password: string) => {
+  return bcrypt.hash(password, 10);
 };
 
 declare global {
